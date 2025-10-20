@@ -1,0 +1,11 @@
+# Node / Next.js
+node_modules
+.next
+.env.local
+# Rust
+/backend/hollowkey_api/target
+
+# IDE & OS files
+.vscode
+.idea
+.DS_Store
