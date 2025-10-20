@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/hollowkey-logo.png" alt="Hollowkey Logo" width="320"/>
+  <img src="assets/hollowkey-logo.jpg" alt="Hollowkey Logo" width="320"/>
 </p>
 
 <h2 align="center">Hollowkey</h2>
