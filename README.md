@@ -1,11 +1,9 @@
 <p align="center">
-  <img src="asset/hollowkey-logo.jpg" alt="Hollowkey Logo" width="500"/>
+  <img src="asset/hollowkey-logo.jpg" alt="Hollowkey Logo" width="400"/>
 </p>
 
-<h2 align="center">Hollowkey</h2>
 <p align="center"><b>Secure, Ephemeral Information Exchange Platform</b></p>
 
----
 
 ### 🔐 Overview
 Hollowkey is a secure, ephemeral information exchange platform built for one-time or time-limited data sharing.  
