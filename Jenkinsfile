@@ -1,6 +1,12 @@
+def COLOR_MAP = [
+  SUCCESS: '#2EB886',
+  FAILURE: '#A30200',
+  UNSTABLE: '#DAA038',
+  ABORTED: '#CCCCCC'
+]
+
 pipeline {
     agent { label 'built-in' }
-
 
     environment {
         AWS_REGION = 'us-east-1'
@@ -11,16 +17,14 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
-        steps {
-          checkout scm
+            steps { checkout scm }
         }
-}
 
-        stage("Building the code :") {
+        stage('Building the code :') {
             steps {
-                sh '''
+                sh '''#!/bin/bash
+                set -e
                 source $HOME/.cargo/env
                 cargo build --release
                 '''
@@ -30,41 +34,39 @@ pipeline {
                     echo "++++++++++ BUILD SUCCESSFULL +++++++++++++++"
                 }
                 failure {
-                    echo "====++++Testing the build code execution failed++++===="
-                    slackSend(
-                        channel: '#cicd-hollowkey',
-                        color: COLOR_MAP[currentBuild.currentResult],
-                        message: "Build Stage Failed ❌ Build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed (<${env.BUILD_URL}|View>)"
-                    )
+                    echo "====++++ Build failed ++++===="
+                    slackSend(channel: '#cicd-hollowkey',
+                              color: COLOR_MAP['FAILURE'],
+                              message: "Build Stage Failed ❌ Build ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|View>)")
                 }
             }
         }
 
-        stage("Testing the build code") {
+        stage('Testing the build code') {
             steps {
-                sh '''
+                sh '''#!/bin/bash
+                set -e
                 source $HOME/.cargo/env
-                cargo test --
+                cargo test -- --nocapture
                 '''
             }
             post {
                 success {
-                    echo "====++++Testing the build code executed successfully++++===="
+                    echo "====++++ Tests passed ++++===="
                 }
                 failure {
-                    echo "====++++Testing the build code execution failed++++===="
-                    slackSend(
-                        channel: '#cicd-hollowkey',
-                        color: COLOR_MAP[currentBuild.currentResult],
-                        message: "Testing Stage Failed ❌ Build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed (<${env.BUILD_URL}|View>)"
-                    )
+                    echo "====++++ Tests failed ++++===="
+                    slackSend(channel: '#cicd-hollowkey',
+                              color: COLOR_MAP['FAILURE'],
+                              message: "Testing Stage Failed ❌ Build ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|View>)")
                 }
             }
         }
 
-        stage("Building docker and pushing images") {
+        stage('Building docker and pushing images') {
             steps {
-                sh '''
+                sh '''#!/bin/bash
+                set -e
                 aws --region ${AWS_REGION} ecr get-login-password | \
                 docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
@@ -80,12 +82,10 @@ pipeline {
                     echo "++++++++++++++ IMAGES BUILT AND PUSHED TO ECR +++++++++++++"
                 }
                 failure {
-                    echo "====++++ image build and push failed++++===="
-                    slackSend(
-                        channel: '#cicd-hollowkey',
-                        color: COLOR_MAP[currentBuild.currentResult],
-                        message: "IMAGE & ECR Stage Failed ❌ Build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed (<${env.BUILD_URL}|View>)"
-                    )
+                    echo "====++++ Image build/push failed ++++===="
+                    slackSend(channel: '#cicd-hollowkey',
+                              color: COLOR_MAP['FAILURE'],
+                              message: "ECR Push Failed ❌ Build ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|View>)")
                 }
             }
         }
@@ -94,11 +94,9 @@ pipeline {
     post {
         always {
             echo "Slack Notification"
-            slackSend(
-                channel: '#cicd-hollowkey',
-                color: COLOR_MAP[currentBuild.currentResult],
-                message: "SUCCESS !!!"
-            )
+            slackSend(channel: '#cicd-hollowkey',
+                      color: COLOR_MAP[currentBuild.currentResult],
+                      message: "Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|View>)")
         }
     }
 }
