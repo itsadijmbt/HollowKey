@@ -12,19 +12,11 @@ pipeline {
 
     stages {
 
-        stage("Fetching Code from git :)") {
-            steps {
-                checkout scm
-            }
-            post {
-                success {
-                    echo "++++++++++ FETCHING SUCCESSFULL +++++++++++++++"
-                }
-                failure {
-                    echo "!!!!!!!!!!!!!! FETCHING FAILED !!!!!!!!!!!!!!!!"
-                }
-            }
+        stage('Checkout') {
+        steps {
+          checkout scm
         }
+}
 
         stage("Building the code :") {
             steps {
