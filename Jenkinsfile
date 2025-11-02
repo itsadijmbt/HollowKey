@@ -26,11 +26,12 @@ pipeline {
 
         stage('Building the code') {
             steps {
-                sh(script: '''
-                    set -e
-                    source $HOME/.cargo/env
-                    cargo build --release
-                ''', shell: '/bin/bash')
+                sh '''
+#!/bin/bash
+set -e
+source $HOME/.cargo/env
+cargo build --release
+'''
             }
             post {
                 success {
@@ -49,11 +50,12 @@ pipeline {
 
         stage('Testing the build code') {
             steps {
-                sh(script: '''
-                    set -e
-                    source $HOME/.cargo/env
-                    cargo test -- --nocapture
-                ''', shell: '/bin/bash')
+                sh '''
+#!/bin/bash
+set -e
+source $HOME/.cargo/env
+cargo test -- --nocapture
+'''
             }
             post {
                 success {
@@ -72,17 +74,18 @@ pipeline {
 
         stage('Building docker and pushing images') {
             steps {
-                sh(script: '''
-                    set -e
-                    aws --region ${AWS_REGION} ecr get-login-password | \
-                        docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                sh '''
+#!/bin/bash
+set -e
+aws --region ${AWS_REGION} ecr get-login-password | \
+    docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
-                    docker build -t ${ECR_REPO}:${IMAGE_TAG} .
-                    docker tag ${ECR_REPO}:${IMAGE_TAG} ${IMAGE_URI}:${IMAGE_TAG}
-                    docker tag ${ECR_REPO}:${IMAGE_TAG} ${IMAGE_URI}:latest
-                    docker push ${IMAGE_URI}:${IMAGE_TAG}
-                    docker push ${IMAGE_URI}:latest
-                ''', shell: '/bin/bash')
+docker build -t ${ECR_REPO}:${IMAGE_TAG} .
+docker tag ${ECR_REPO}:${IMAGE_TAG} ${IMAGE_URI}:${IMAGE_TAG}
+docker tag ${ECR_REPO}:${IMAGE_TAG} ${IMAGE_URI}:latest
+docker push ${IMAGE_URI}:${IMAGE_TAG}
+docker push ${IMAGE_URI}:latest
+'''
             }
             post {
                 success {
