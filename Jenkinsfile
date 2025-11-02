@@ -3,10 +3,6 @@ pipeline {
         label 'any'
     }
 
-    tools {
-        cargo 'cargo 1.91.0'
-        rust 'rustc 1.91.0'
-    }
 
     environment {
         AWS_REGION = 'us-east-1'
@@ -20,7 +16,7 @@ pipeline {
 
         stage("Fetching Code from git :)") {
             steps {
-                git branch: 'main', url: 'https://github.com/itsadijmbt/HollowKey'
+                checkout scm
             }
             post {
                 success {
