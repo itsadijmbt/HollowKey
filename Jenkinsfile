@@ -4,8 +4,8 @@ pipeline {
     }
 
     tools {
-        cargo 'cargo 1.91.0'
-        rust 'rustc 1.91.0'
+        // cargo 'cargo 1.91.0'
+        // rust 'rustc 1.91.0'
     }
 
     environment {
@@ -28,83 +28,88 @@ pipeline {
                 success {
                     echo "++++++++++ FETCHING SUCCESSFULL +++++++++++++++"
                 }
-                failure {
-                    echo "!!!!!!!!!!!!!! FETCHING FAILED !!!!!!!!!!!!!!!!"
-                }
-            }
-        }
-
-        stage("Building the code :") {
-            steps {
-                sh '''
-                source $HOME/.cargo/env
-                cargo build --release
-                '''
-            }
-            post {
-                success {
-                    echo "++++++++++ BUILD SUCCESSFULL +++++++++++++++"
-                }
-                failure {
-                    echo "====++++Testing the build code execution failed++++===="
-                    slackSend(
-                        channel: '#cicd-hollowkey',
-                        color: COLOR_MAP[currentBuild.currentResult],
-                        message: "Build Stage Failed ❌ Build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed (<${env.BUILD_URL}|View>)"
+                 failure {
+                echo "====++++Testing the build code execution failed++++===="
+                 slackSend(
+                         channel: '#cicd-hollowkey',
+                         color: COLOR_MAP[currentBuild.currentResult],
+                        message: "polling failed❌ "
                     )
-                }
+                 }
             }
         }
 
-        stage("Testing the build code") {
-            steps {
-                sh '''
-                source $HOME/.cargo/env
-                cargo test --
-                '''
-            }
-            post {
-                success {
-                    echo "====++++Testing the build code executed successfully++++===="
-                }
-                failure {
-                    echo "====++++Testing the build code execution failed++++===="
-                    slackSend(
-                        channel: '#cicd-hollowkey',
-                        color: COLOR_MAP[currentBuild.currentResult],
-                        message: "Testing Stage Failed ❌ Build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed (<${env.BUILD_URL}|View>)"
-                    )
-                }
-            }
-        }
+        // stage("Building the code :") {
+        //     steps {
+        //         sh '''
+        //         source $HOME/.cargo/env
+        //         cargo build --release
+        //         '''
+        //     }
+        //     post {
+        //         success {
+        //             echo "++++++++++ BUILD SUCCESSFULL +++++++++++++++"
+        //         }
+        //         failure {
+        //             echo "====++++Testing the build code execution failed++++===="
+        //             slackSend(
+        //                 channel: '#cicd-hollowkey',
+        //                 color: COLOR_MAP[currentBuild.currentResult],
+        //                 message: "Build Stage Failed ❌ Build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed (<${env.BUILD_URL}|View>)"
+        //             )
+        //         }
+        //     }
+        // }
 
-        stage("Building docker and pushing images") {
-            steps {
-                sh '''
-                aws --region ${AWS_REGION} ecr get-login-password | \
-                docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+        // stage("Testing the build code") {
+        //     steps {
+        //         sh '''
+        //         source $HOME/.cargo/env
+        //         cargo test --
+        //         '''
+        //     }
+        //     post {
+        //         success {
+        //             echo "====++++Testing the build code executed successfully++++===="
+        //         }
+        //         failure {
+        //             echo "====++++Testing the build code execution failed++++===="
+        //             slackSend(
+        //                 channel: '#cicd-hollowkey',
+        //                 color: COLOR_MAP[currentBuild.currentResult],
+        //                 message: "Testing Stage Failed ❌ Build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed (<${env.BUILD_URL}|View>)"
+        //             )
+        //         }
+        //     }
+        // }
 
-                docker build -t ${ECR_REPO}:${IMAGE_TAG} .
-                docker tag ${ECR_REPO}:${IMAGE_TAG} ${IMAGE_URI}:${IMAGE_TAG}
-                docker tag ${ECR_REPO}:${IMAGE_TAG} ${IMAGE_URI}:latest
-                docker push ${IMAGE_URI}:${IMAGE_TAG}
-                docker push ${IMAGE_URI}:latest
-                '''
-            }
-            post {
-                success {
-                    echo "++++++++++++++ IMAGES BUILT AND PUSHED TO ECR +++++++++++++"
-                }
-                failure {
-                    echo "====++++ image build and push failed++++===="
-                    slackSend(
-                        channel: '#cicd-hollowkey',
-                        color: COLOR_MAP[currentBuild.currentResult],
-                        message: "IMAGE & ECR Stage Failed ❌ Build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed (<${env.BUILD_URL}|View>)"
-                    )
-                }
-            }
-        }
+        // stage("Building docker and pushing images") {
+        //     steps {
+        //         sh '''
+        //         aws --region ${AWS_REGION} ecr get-login-password | \
+        //         docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+
+        //         docker build -t ${ECR_REPO}:${IMAGE_TAG} .
+        //         docker tag ${ECR_REPO}:${IMAGE_TAG} ${IMAGE_URI}:${IMAGE_TAG}
+        //         docker tag ${ECR_REPO}:${IMAGE_TAG} ${IMAGE_URI}:latest
+        //         docker push ${IMAGE_URI}:${IMAGE_TAG}
+        //         docker push ${IMAGE_URI}:latest
+        //         '''
+        //     }
+        //     post {
+        //         success {
+        //             echo "++++++++++++++ IMAGES BUILT AND PUSHED TO ECR +++++++++++++"
+        //         }
+        //         failure {
+        //             echo "====++++ image build and push failed++++===="
+        //             slackSend(
+        //                 channel: '#cicd-hollowkey',
+        //                 color: COLOR_MAP[currentBuild.currentResult],
+        //                 message: "IMAGE & ECR Stage Failed ❌ Build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed (<${env.BUILD_URL}|View>)"
+        //             )
+        //         }
+        //     }
+        // }
     }
 
     post {
