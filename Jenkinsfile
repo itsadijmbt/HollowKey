@@ -23,11 +23,11 @@ pipeline {
 
         stage('Building the code :') {
             steps {
-                sh '''#!/bin/bash
-                set -e
-                source $HOME/.cargo/env
-                cargo build --release
-                '''
+                                sh(script: '''
+                    set -e
+                    source $HOME/.cargo/env
+                    cargo build --release
+                ''', shell: '/bin/bash')
             }
             post {
                 success {
@@ -44,11 +44,11 @@ pipeline {
 
         stage('Testing the build code') {
             steps {
-                sh '''#!/bin/bash
-                set -e
-                source $HOME/.cargo/env
-                cargo test -- --nocapture
-                '''
+                sh(script: '''
+                    set -e
+                    source $HOME/.cargo/env
+                    cargo test --nocapture
+                ''', shell: '/bin/bash')
             }
             post {
                 success {
@@ -65,7 +65,7 @@ pipeline {
 
         stage('Building docker and pushing images') {
             steps {
-                sh '''#!/bin/bash
+                sh(script:'''#!/bin/bash
                 set -e
                 aws --region ${AWS_REGION} ecr get-login-password | \
                 docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
@@ -75,7 +75,7 @@ pipeline {
                 docker tag ${ECR_REPO}:${IMAGE_TAG} ${IMAGE_URI}:latest
                 docker push ${IMAGE_URI}:${IMAGE_TAG}
                 docker push ${IMAGE_URI}:latest
-                '''
+                ''', shell: '/bin/bash')
             }
             post {
                 success {
