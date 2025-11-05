@@ -26,11 +26,13 @@ pipeline {
 
         stage('Building the code') {
             steps {
-                sh '''#!/usr/bin/env bash
+                dir('backend/hollowkey_api') {
+                    sh '''#!/usr/bin/env bash
 set -e
 source /var/lib/jenkins/.cargo/env
 cargo build --release
 '''
+                }
             }
             post {
                 success {
@@ -49,11 +51,13 @@ cargo build --release
 
         stage('Testing the build code') {
             steps {
-                sh '''#!/usr/bin/env bash
+                dir('backend/hollowkey_api') {
+                    sh '''#!/usr/bin/env bash
 set -e
 source /var/lib/jenkins/.cargo/env
 cargo test -- --nocapture
 '''
+                }
             }
             post {
                 success {
@@ -77,7 +81,7 @@ set -e
 aws --region ${AWS_REGION} ecr get-login-password | \
     docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
-docker build -t ${ECR_REPO}:${IMAGE_TAG} .
+docker build -t ${ECR_REPO}:${IMAGE_TAG} -f backend/hollowkey_api/Dockerfile backend/hollowkey_api
 docker tag ${ECR_REPO}:${IMAGE_TAG} ${IMAGE_URI}:${IMAGE_TAG}
 docker tag ${ECR_REPO}:${IMAGE_TAG} ${IMAGE_URI}:latest
 docker push ${IMAGE_URI}:${IMAGE_TAG}
@@ -106,8 +110,4 @@ docker push ${IMAGE_URI}:latest
             slackSend(
                 channel: '#cicd-hollowkey',
                 color: COLOR_MAP[currentBuild.currentResult],
-                message: "Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|View>)"
-            )
-        }
-    }
-}
+                message:
