@@ -26,8 +26,7 @@ pipeline {
 
         stage('Building the code') {
             steps {
-                sh '''
-#!/bin/bash
+                sh '''#!/usr/bin/env bash
 set -e
 source $HOME/.cargo/env
 cargo build --release
@@ -50,8 +49,7 @@ cargo build --release
 
         stage('Testing the build code') {
             steps {
-                sh '''
-#!/bin/bash
+                sh '''#!/usr/bin/env bash
 set -e
 source $HOME/.cargo/env
 cargo test -- --nocapture
@@ -74,8 +72,7 @@ cargo test -- --nocapture
 
         stage('Building docker and pushing images') {
             steps {
-                sh '''
-#!/bin/bash
+                sh '''#!/usr/bin/env bash
 set -e
 aws --region ${AWS_REGION} ecr get-login-password | \
     docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
