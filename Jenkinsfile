@@ -110,4 +110,8 @@ docker push ${IMAGE_URI}:latest
             slackSend(
                 channel: '#cicd-hollowkey',
                 color: COLOR_MAP[currentBuild.currentResult],
-                message:
+                message: "Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|View>)"
+            )
+        }
+    }
+}
