@@ -28,7 +28,7 @@ pipeline {
             steps {
                 sh '''#!/usr/bin/env bash
 set -e
-source /root/.cargo/env
+source $HOME/.cargo/env
 cargo build --release
 '''
             }
@@ -51,7 +51,7 @@ cargo build --release
             steps {
                 sh '''#!/usr/bin/env bash
 set -e
-source /root/.cargo/env
+source $HOME/.cargo/env
 cargo test -- --nocapture
 '''
             }
